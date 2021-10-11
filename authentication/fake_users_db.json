@@ -1,0 +1,16 @@
+{
+    "johndoe": {
+        "username": "johndoe",
+        "full_name": "John Doe",
+        "email": "johndoe@example.com",
+        "hashed_password": "$2b$12$N2IpXtFxtyYkG8.3eFOAAuACtXim3srzGii6.xqUQN2tjrEwTF9V6",
+        "disabled": false
+    },
+    "alice": {
+        "username": "alice",
+        "full_name": "Alice Wonderson",
+        "email": "alice@example.com",
+        "hashed_password": "fakehashedsecret2",
+        "disabled": true
+    }
+}
