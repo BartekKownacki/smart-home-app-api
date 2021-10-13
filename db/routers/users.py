@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import datetime, timedelta
 
-from models.UserModel import crud, models, schemas
+from ..models.UserModel import crud, schemas
 import dependencies
 from database import SessionLocal, engine
 from sqlalchemy.orm import Session
