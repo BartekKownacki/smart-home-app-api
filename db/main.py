@@ -110,7 +110,7 @@ async def get_current_active_user(current_user: schemas.User = Depends(get_curre
     return current_user
 
 
-@router.get("/", tags=["def"])
+@app.get("/")
 async def index():
     return RedirectResponse("/docs")
 
