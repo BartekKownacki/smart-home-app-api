@@ -1,0 +1,7 @@
+{
+    "jwt_config": {
+        "SECRET_KEY": "541668eee7d03dd49534f4b0fba8f546ffed97bce7c66548328b08df457ad608",
+        "ALGORITHM": "HS256",
+        "ACCESS_TOKEN_EXPIRE_MINUTES": 10
+    }
+}
