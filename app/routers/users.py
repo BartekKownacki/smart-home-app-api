@@ -64,3 +64,5 @@ async def refresh_token(current_user: schemas.User = Depends(dependencies.get_cu
 async def create_hash_from_password(password: str):
     hashed_password = dependencies.get_hashed_password(password)
     return {"hashed_password": hashed_password}
+
+

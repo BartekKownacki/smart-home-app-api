@@ -1,7 +1,6 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-
+from sqlalchemy.orm import relationship
 from database import Base
-
 
 class User(Base):
     __tablename__ = "users"
@@ -11,3 +10,5 @@ class User(Base):
     email = Column(String, unique=True)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
+
+    ac_socket = relationship("AcSocket", back_populates="user")

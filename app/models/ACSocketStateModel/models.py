@@ -1,13 +1,18 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
+from sqlalchemy.orm import relationship
 from database import Base
 
-
-class User(Base):
-    __tablename__ = "users"
+class Config(Base):
+    __tablename__ = "AcSocket"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    email = Column(String, unique=True)
-    hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
+    state: Column(Boolean)
+    timeStampToTurnOn: Column(DateTime, nullable=True)
+    timeStampToTurnOff: Column(DateTime, nullable=True)
+    createdDate: Column(DateTime)
+    createdById: Column(Integer, ForeignKey("users.id"))
+    
+
+    User = relationship("User", back_populates="ac_socket")
+
+

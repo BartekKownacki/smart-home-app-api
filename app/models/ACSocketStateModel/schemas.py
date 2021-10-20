@@ -1,21 +1,21 @@
 from typing import List, Optional
-
+from datetime import datetime
 from pydantic import BaseModel
 
 
-class UserBase(BaseModel):
-    username: str
-    email: str
+class AcSocketBase(BaseModel):
+    state: bool
+    timeStampToTurnOn: Optional[datetime] = None
+    timeStampToTurnOff: Optional[datetime] = None
+
+class AcSocketCreate(AcSocketBase):
+    pass
 
 
-class UserCreate(UserBase):
-    password: str
-
-
-class User(UserBase):
-
+class AcSocket(AcSocketBase):
     id: int
-    is_active: bool
+    createdById: int
+    createdDate: datetime
 
     class Config:
         orm_mode = True

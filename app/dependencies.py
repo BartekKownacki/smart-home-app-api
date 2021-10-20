@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List
+
 import json
 
 from models.UserModel import crud, schemas
@@ -13,12 +14,14 @@ from pydantic import BaseModel
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-config_file = open("config.json")
+config_file = open("config.json", "r")
 config_file_data = json.load(config_file)
 
 SECRET_KEY = config_file_data["jwt_config"]["SECRET_KEY"]
 ALGORITHM = config_file_data["jwt_config"]["ALGORITHM"]
 ACCESS_TOKEN_EXPIRE_MINUTES = config_file_data["jwt_config"]["ACCESS_TOKEN_EXPIRE_MINUTES"]
+
+#config_file.close()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
@@ -32,6 +35,13 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
+class Device(BaseModel):
+    name: str
+    type: str
+    deviceID: int
+    ip_address: str
+    get_endpoint: List[str]
+    post_endpoint: List[str]
 
 def get_db():
     db = SessionLocal()
@@ -101,3 +111,49 @@ async def get_current_active_user(current_user: schemas.User = Depends(get_curre
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+async def get_current_active_user_id(current_user: schemas.User = Depends(get_current_user)):
+    if not current_user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user.id
+
+def get_devices_config():
+    config_file = open("config_devices.json", "r")
+    DEVICES = json.load(config_file)
+    return DEVICES
+
+def add_device_to_config(device: Device):
+    with open("config_devices.json",'r+') as file:
+        file_data = json.load(file)
+        devices_json_object = {
+            device.name: {
+                "name": device.name,
+                "type": device.type,
+                "deviceID": device.deviceID,
+                "ip_address": device.ip_address,
+                "endpoints": {
+                    "get": device.get_endpoint,
+                    "post": device.post_endpoint
+                }
+            }
+        }
+
+        file_data.update(devices_json_object)
+        file.seek(0)
+        json.dump(file_data, file, indent = 4)
+        print(file)
+    return device.name
+
+def remove_device_from_config(device_name: str):    
+    with open("config_devices.json",'r+') as file:
+        file_data = json.load(file)
+        for element in file_data:
+            if element == device_name:
+                file_data.pop(element)
+                break
+        print(file_data)
+
+    with open('config_devices.json', 'w') as dest_file:
+        dest_file.write(json.dumps(file_data))
+    return True
+
