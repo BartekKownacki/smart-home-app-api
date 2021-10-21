@@ -2,8 +2,6 @@ app/__pycache__/database.cpython-39.pyc
 app/__pycache__/dependencies.cpython-39.pyc
 app/__pycache__/main.cpython-39.pyc
 .gitignore
-app/.deta/prog_info
-app/.deta/state
 app/routers/__pycache__/__init__.cpython-39.pyc
 app/routers/__pycache__/users.cpython-39.pyc
 app/models/UserModel/__pycache__/__init__.cpython-39.pyc

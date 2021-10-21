@@ -11,4 +11,4 @@ class User(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
 
-    ac_socket = relationship("AcSocket", back_populates="user")
+    acSockets = relationship("AcSocket", back_populates="owner")
