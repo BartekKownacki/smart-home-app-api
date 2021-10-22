@@ -12,3 +12,4 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     acSockets = relationship("AcSocket", back_populates="owner")
+    lightSockets = relationship("LightSocket", back_populates="owner")

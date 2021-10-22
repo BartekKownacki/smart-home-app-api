@@ -3063,3 +3063,9 @@ app/models/ACSocketStateModel/__pycache__/crud.cpython-39.pyc
 app/models/ACSocketStateModel/__pycache__/models.cpython-39.pyc
 app/models/ACSocketStateModel/__pycache__/schemas.cpython-39.pyc
 app/models/__pycache__/__init__.cpython-39.pyc
+app/routers/__pycache__/lightSocket.cpython-39.pyc
+.gitignore
+app/models/LightSocketModel/__pycache__/__init__.cpython-39.pyc
+app/models/LightSocketModel/__pycache__/crud.cpython-39.pyc
+app/models/LightSocketModel/__pycache__/models.cpython-39.pyc
+app/models/LightSocketModel/__pycache__/schemas.cpython-39.pyc

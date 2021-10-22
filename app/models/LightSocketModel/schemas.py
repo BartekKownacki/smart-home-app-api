@@ -3,16 +3,16 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class AcSocketBase(BaseModel):
+class LightSocketBase(BaseModel):
     state: bool
     timeStampToTurnOn: Optional[datetime] = None
     timeStampToTurnOff: Optional[datetime] = None
 
-class AcSocketCreate(AcSocketBase):
+class LightSocketCreate(LightSocketBase):
     pass
 
 
-class AcSocket(AcSocketBase):
+class LightSocket(LightSocketBase):
     id: int
     owner_id: int
     createdDate: datetime

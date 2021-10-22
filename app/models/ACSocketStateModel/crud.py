@@ -13,7 +13,7 @@ def create_ac_state(db: Session, acState: schemas.AcSocketCreate, user_id: int):
                                 timeStampToTurnOn = acState.timeStampToTurnOn,
                                 timeStampToTurnOff = acState.timeStampToTurnOff,
                                 createdDate=createdDate,
-                                createdById=user_id)
+                                owner_id=user_id)
     db.add(db_acState)
     db.commit()
     db.refresh(db_acState)
