@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse, HTMLResponse
-from routers import users, acSocket, devices, lightSocket
+from routers import users, acSocket, devices, lightSocket, ledStripe, temphumid
 from models.ACSocketStateModel import models as AcSocketStateModel
 from models.UserModel import models as UserModel 
 from models.LightSocketModel import models as LightSocketModel 
+from models.LedStripeModel import models as LedStripeModel 
+from models.TempHumidModel import models as TempHumidModel 
 from database import engine
 
 app = FastAPI()
@@ -11,6 +13,8 @@ app = FastAPI()
 AcSocketStateModel.Base.metadata.create_all(bind=engine)
 UserModel.Base.metadata.create_all(bind=engine)
 LightSocketModel.Base.metadata.create_all(bind=engine)
+LedStripeModel.Base.metadata.create_all(bind=engine)
+TempHumidModel.Base.metadata.create_all(bind=engine)
 
 index_page_file = open("index.html")
 
@@ -22,4 +26,13 @@ app.include_router(devices.router)
 app.include_router(users.router)
 app.include_router(acSocket.router)
 app.include_router(lightSocket.router)
+app.include_router(ledStripe.router)
+app.include_router(temphumid.router)
 
+
+'''
+TODO
+get last state dla wszystkich, tak zeby sprawdzalo adres ip
+
+
+'''
