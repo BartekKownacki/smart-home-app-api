@@ -11,6 +11,7 @@ class LedStripe(Base):
     color_green = Column(Integer)
     color_blue = Column(Integer)
     createdDate = Column(DateTime)
+    device_id = Column(Integer)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="ledStripes")

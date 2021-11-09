@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 
 class LedStripeBase(BaseModel):
+    device_id: int
     state: bool
     color_red: int
     color_green: int

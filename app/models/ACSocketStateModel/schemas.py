@@ -4,13 +4,14 @@ from pydantic import BaseModel
 
 
 class AcSocketBase(BaseModel):
+    device_id: int
     state: bool
     timeStampToTurnOn: Optional[datetime] = None
     timeStampToTurnOff: Optional[datetime] = None
+    
 
 class AcSocketCreate(AcSocketBase):
     pass
-
 
 class AcSocket(AcSocketBase):
     id: int

@@ -9,7 +9,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True)
     hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
+    is_admin = Column(Boolean, default=False)
 
     acSockets = relationship("AcSocket", back_populates="owner")
     lightSockets = relationship("LightSocket", back_populates="owner")

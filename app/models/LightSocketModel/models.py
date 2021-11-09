@@ -10,6 +10,7 @@ class LightSocket(Base):
     timeStampToTurnOn = Column(DateTime, nullable=True)
     timeStampToTurnOff = Column(DateTime, nullable=True)
     createdDate = Column(DateTime)
+    device_id = Column(Integer)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="lightSockets")

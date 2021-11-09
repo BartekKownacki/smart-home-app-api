@@ -1,1 +1,38 @@
-{"ac_socket_bedroom": {"name": "ac_socket_bedroom", "type": "acsocket", "deviceID": 123, "ip_address": "192.168.1.14", "endpoints": {"post": ["/setNewState"]}}, "ac_socket_bedroom2": {"name": "ac_socket_bedroom", "type": "acsocket", "deviceID": 123, "ip_address": "192.168.1.14", "endpoints": {"post": ["/setNewState"]}}, "doopa": {"name": "doopa", "type": "doopa", "deviceID": 0, "ip_address": "doopa", "endpoints": {"get": ["doopa"], "post": ["doopa"]}}}
+[
+  {
+    "name": "ac_socket_bedroom",
+    "type": "AC_SOCKET",
+    "deviceID": 12301,
+    "ip_address": "192.168.1.14",
+    "endpoints": {
+      "post": ["/setNewState"]
+    }
+  },
+  {
+    "name": "ac_socket_bedroom",
+    "type": "AC_SOCKET",
+    "deviceID": 12300,
+    "ip_address": "192.168.1.15",
+    "endpoints": {
+      "post": ["/setNewState"]
+    }
+  },
+  {
+    "name": "light_socket_bedroom",
+    "type": "LIGHT_BULB",
+    "deviceID": 12302,
+    "ip_address": "192.168.1.16",
+    "endpoints": {
+      "post": ["/setNewState"]
+    }
+  },
+  {
+    "name": "temphumid_kitchen",
+    "type": "TEMPHUMID",
+    "deviceID": 12303,
+    "ip_address": "192.168.1.17",
+    "endpoints": {
+      "post": ["/setNewState"]
+    }
+  }
+]
