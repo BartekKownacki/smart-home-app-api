@@ -42,8 +42,8 @@ class BaseDevice(BaseModel):
     name: str
     type: str
     ip_address: str
-    get_endpoint: List[str]
-    post_endpoint: List[str]
+    get_endpoint: str
+    post_endpoint: str
 
 class Device(BaseDevice):
     deviceID: str

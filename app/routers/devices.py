@@ -18,7 +18,7 @@ class Device(BaseModel):
     type: str
     deviceID: int
     ip_address: str
-    endpoints: dict[str, list[str]]
+    endpoints: dict[str, str]
 
 
 
