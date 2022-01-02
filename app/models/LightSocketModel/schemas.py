@@ -6,8 +6,8 @@ from pydantic import BaseModel
 class LightSocketBase(BaseModel):
     device_id: int
     state: bool
-    timeStampToTurnOn: Optional[datetime] = None
-    timeStampToTurnOff: Optional[datetime] = None
+    # timeStampToTurnOn: Optional[datetime] = None
+    # timeStampToTurnOff: Optional[datetime] = None
 
 class LightSocketCreate(LightSocketBase):
     pass

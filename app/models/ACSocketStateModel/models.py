@@ -7,8 +7,8 @@ class AcSocket(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     state = Column(Boolean)
-    timeStampToTurnOn = Column(DateTime, nullable=True)
-    timeStampToTurnOff = Column(DateTime, nullable=True)
+    # timeStampToTurnOn = Column(DateTime, nullable=True)
+    # timeStampToTurnOff = Column(DateTime, nullable=True)
     createdDate = Column(DateTime)
     device_id = Column(Integer)
     owner_id = Column(Integer, ForeignKey("users.id"))

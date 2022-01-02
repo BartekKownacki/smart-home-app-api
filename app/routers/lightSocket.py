@@ -16,12 +16,12 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/getLastState/{deviceId}", response_model=schemas.LightSocket)
+@router.get("/getLastState/{deviceId}", response_model=schemas.LightSocketBase)
 def get_last_light_socket_state(deviceId:int, db: Session = Depends(dependencies.get_db), current_user_id: int = Depends(dependencies.get_current_user_id)):
     state = crud.get_last_light_state(db, deviceId)
     return state
 
-@router.get("/getLastState/{deviceId}/device", response_model=schemas.LightSocket)
+@router.get("/getLastState/{deviceId}/device", response_model=schemas.LightSocketBase)
 def get_last_light_socket_state_for_registered_device(deviceId:int, request: Request, db: Session = Depends(dependencies.get_db), device_is_registered: str = Depends(dependencies.get_current_request_ip)):
     if(device_is_registered):
         state = crud.get_last_light_state(db, deviceId)

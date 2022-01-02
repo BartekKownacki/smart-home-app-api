@@ -7,6 +7,12 @@ from fastapi import Depends, APIRouter
 
 import json
 
+# Available device types: 
+# TEMP_HUMID
+# LED_STRIPE
+# LIGHT_BULB
+# AC_SOCKET
+
 router = APIRouter(
     prefix="/devices",
     tags=["Devices config actions"],
@@ -18,7 +24,7 @@ class Device(BaseModel):
     type: str
     deviceID: int
     ip_address: str
-    endpoints: dict[str, str]
+    #endpoints: dict[str, str]
 
 
 

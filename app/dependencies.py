@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional, List
 
 import json
-
+import httpx
 from models.UserModel import crud, schemas
 from database import SessionLocal
 from sqlalchemy.orm import Session
@@ -139,7 +139,7 @@ async def get_current_request_ip(request: Request):
     #     if(ipToReturn == config_file_data[element]["ip_address"]):
     #         return True
         
-    # raise HTTPException(status_code=403, detail="device not registered")
+    # raise HTTPException(status_code=403, detail="device is not registered")
 
     return True
 
@@ -190,6 +190,26 @@ def get_id_from_ip(device_ip, type):
                 id = element["deviceID"]
 
     return id
+
+def get_ip_from_id(device_id, type):
+    with open("config_devices.json",'r+') as file:
+        file_data = json.load(file)
+        ip = ""
+        for element in file_data:
+            if(element["type"] == type and element["deviceID"] == device_id):
+                ip = element["ip_address"]
+
+    return ip
+
+def get_endpoint_from_id(device_id, type, endpoint_type):
+    with open("config_devices.json",'r+') as file:
+        file_data = json.load(file)
+        address = ""
+        for element in file_data:
+            if(element["type"] == type and element["deviceID"] == device_id):
+                address = element["endpoints"][endpoint_type]
+
+    return address
 
 # def is_device_in_config_by_ip(deviceIp, type):
 #     usedIps = get_ips_from_config_for_type(type)
@@ -246,7 +266,27 @@ def remove_device_from_config(device_id: int):
         dest_file.write(json.dumps(file_data))
     return True
 
+def send_data_to_esp(url, data):
+    try:
+        response = httpx.post(url, json=data)
+        return response.status_code
+    except:
+        return 500
+
+def get_data_from_esp(url):
+    try:
+        response = httpx.get(url)
+        return response
+    except:
+        obj = {status: 500}
+        return obj
+
 def device_error():
-    return JSONResponse(status_code=400, content={
+    return JSONResponse(status_code=403, content={
         "error_code": 403,
         "message": "Device is not registered or device id is used for a different device type"}, )
+
+def esp_error(code):
+    return JSONResponse(status_code=code, content={
+        "error_code": code,
+        "message": "There was an error with device"}, )
