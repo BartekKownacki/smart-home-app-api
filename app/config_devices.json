@@ -1,41 +1,41 @@
 [
-    {
-        "name": "ac_socket_bedroom",
-        "type": "AC_SOCKET",
-        "deviceID": 12301,
-        "ip_address": "192.168.1.14",
-        "endpoints": {
-            "post": "/setNewState"
-        }
-    },
-    {
-        "name": "light",
-        "type": "LIGHT_BULB",
-        "deviceID": 77383,
-        "ip_address": "192.168.0.15",
-        "endpoints": {
-            "get": "/ads",
-            "post": "/dupa"
-        }
-    },
-    {
-        "name": "temp",
-        "type": "TEMP_HUMID",
-        "deviceID": 96668,
-        "ip_address": "192.168.0.16",
-        "endpoints": {
-            "get": "/ads",
-            "post": "/dupa"
-        }
-    },
-    {
-        "name": "led",
-        "type": "LED_STRIPE",
-        "deviceID": 42027,
-        "ip_address": "192.168.0.16",
-        "endpoints": {
-            "get": "/ads",
-            "post": "/dupa"
-        }
+  {
+    "name": "ac_socket_bedroom",
+    "type": "AC_SOCKET",
+    "deviceID": 12301,
+    "ip_address": "192.168.1.14",
+    "endpoints": {
+      "post": "/setNewState"
     }
+  },
+  {
+    "name": "light",
+    "type": "LIGHT_BULB",
+    "deviceID": 77383,
+    "ip_address": "192.168.1.15",
+    "endpoints": {
+      "get": "/ads",
+      "post": "/dupa"
+    }
+  },
+  {
+    "name": "temp",
+    "type": "TEMP_HUMID",
+    "deviceID": 96668,
+    "ip_address": "192.168.1.16",
+    "endpoints": {
+      "get": "/ads",
+      "post": "/dupa"
+    }
+  },
+  {
+    "name": "led",
+    "type": "LED_STRIPE",
+    "deviceID": 42027,
+    "ip_address": "192.168.1.17",
+    "endpoints": {
+      "get": "/ads",
+      "post": "/dupa"
+    }
+  }
 ]

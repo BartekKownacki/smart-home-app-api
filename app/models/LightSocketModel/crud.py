@@ -15,6 +15,16 @@ def get_last_light_state(db: Session, deviceId: int):
                                                 state = db_obj.state,)
     return state_to_return
 
+def get_last_light_state_for_device(db: Session, deviceIp: str):
+    deviceId = dependencies.get_id_from_ip(deviceIp, DEVICE_TYPE)
+    if(not dependencies.is_device_in_config(deviceId, DEVICE_TYPE)):
+        return dependencies.device_error()
+    
+    db_obj = db.query(models.LightSocket).filter(models.LightSocket.device_id == deviceId).order_by(models.LightSocket.id.desc()).first()
+    state_to_return = schemas.LightSocketBase(device_id = db_obj.device_id,
+                                                state = db_obj.state,)
+    return state_to_return
+
 
 def create_light_state(db: Session, lightState: schemas.LightSocketCreate, user_id: int):
     createdDate = datetime.now()

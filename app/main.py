@@ -11,13 +11,7 @@ from database import engine
 
 app = FastAPI() 
 
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-    "http://127.0.0.1:8000",
-    "https://qalzig.deta.dev",
-    "*"
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -53,9 +47,3 @@ app.include_router(ledStripe.router)
 app.include_router(temphumid.router)
 
 
-'''
-TODO
-get last state dla wszystkich, tak zeby sprawdzalo adres ip
-https://stackoverflow.com/questions/60098005/fastapi-starlette-get-client-real-ip
-
-'''

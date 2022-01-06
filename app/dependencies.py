@@ -30,6 +30,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login/AuthorizeButton")
 
 
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -48,7 +50,10 @@ class BaseDevice(BaseModel):
 class Device(BaseDevice):
     deviceID: str
 
-    
+class InternalError(BaseModel):
+    status: int
+
+
 def get_db():
     db = SessionLocal()
     try:
@@ -61,7 +66,7 @@ def getUser(username, db):
     db_user = crud.get_user_by_username(db, username)
     if not db_user:
         raise HTTPException(
-            status_code=401, detail="username already registered")
+            status_code=403, detail="Username already registered")
 
     return db_user
 
@@ -80,7 +85,7 @@ def authenticate_user(db, username: str, password: str):
         return False
     if not verify_password(password, user.hashed_password):
         return False
-    userToReturn = schemas.User(id = user.id, username = user.username, email = user.email, is_admin = user.is_admin)
+    userToReturn = schemas.User(id = user.id, username = user.username, email = user.email)
     return userToReturn
 
 
@@ -112,7 +117,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     user = getUser(token_data.username, db)
     if user is None:
         raise credentials_exception
-    userToReturn = schemas.User(id = user.id, username = user.username, email = user.email, is_admin = user.is_admin)
+    userToReturn = schemas.User(id = user.id, username = user.username, email = user.email)
     return userToReturn
 
 
@@ -124,7 +129,10 @@ async def is_current_user_an_admin(current_user: schemas.User = Depends(get_curr
         raise HTTPException(status_code=403, detail="Insufficent permissions")
     return current_user
 
-async def get_current_request_ip(request: Request):
+def get_request_ip(request: Request):
+    return request.client.host
+
+async def is_ip_in_config(request: Request):
 
     config_file = open("config_devices.json", "r")
     config_file_data = json.load(config_file)
@@ -278,13 +286,22 @@ def get_data_from_esp(url):
         response = httpx.get(url)
         return response
     except:
-        obj = {status: 500}
-        return obj
+        return 500
 
 def device_error():
     return JSONResponse(status_code=403, content={
         "error_code": 403,
         "message": "Device is not registered or device id is used for a different device type"}, )
+
+def password_error():
+    return JSONResponse(status_code=403, content={
+        "error_code": 403,
+        "message": "Password did not match the requirements"}, )
+
+def email_error():
+    return JSONResponse(status_code=403, content={
+        "error_code": 403,
+        "message": "Email did not match the requirements"}, )
 
 def esp_error(code):
     return JSONResponse(status_code=code, content={

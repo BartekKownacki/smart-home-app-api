@@ -51,23 +51,23 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends() , db: Session =
 
 @router.post("/create", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(dependencies.get_db)):
-    db_user = crud.get_user_by_username(db, username=user.username)
+    db_user = crud.get_user_by_username_email(db, username=user.username, email=user.email)
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Uername or email already registered")
     return crud.create_user(db=db, user=user)
 
 
 @router.get("/getAll", response_model=List[schemas.User])
-def get_all_users(skip: int = 0, limit: int = 100, db: Session = Depends(dependencies.get_db), current_user: schemas.User = Depends(dependencies.is_current_user_an_admin)):
+def get_all_users(skip: int = 0, limit: int = 100, db: Session = Depends(dependencies.get_db), current_user: schemas.User = Depends(dependencies.get_current_user)):
     users = crud.get_users(db, skip=skip, limit=limit)
     return users
 
-@router.put("/changeRole", response_model=schemas.ChangeRoleResponse)
-def change_user_role(user_name: str, value: bool, db: Session = Depends(dependencies.get_db), current_user: schemas.User = Depends(dependencies.get_current_user)):
-    username = crud.change_user_role(db, username=user_name, value=value)
-    if not username:
-        raise HTTPException(status_code=404, detail="User not found")
-    return username
+# @router.put("/changeRole", response_model=schemas.ChangeRoleResponse)
+# def change_user_role(user_name: str, value: bool, db: Session = Depends(dependencies.get_db), current_user: schemas.User = Depends(dependencies.get_current_user)):
+#     username = crud.change_user_role(db, username=user_name, value=value)
+#     if not username:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     return username
 
 @router.get("/info",  response_model=schemas.User)
 async def get_actual_user_info(current_user: schemas.User = Depends(dependencies.get_current_user)):

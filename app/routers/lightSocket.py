@@ -16,17 +16,20 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+#For device
+@router.get("/getLastState/device", response_model=schemas.LightSocketBase)
+def get_last_light_socket_state_for_registered_device(request: Request,db: Session = Depends(dependencies.get_db), device_is_registered: str = Depends(dependencies.is_ip_in_config)):
+    deviceIp = dependencies.get_request_ip(request)
+    print(deviceIp)
+    if(device_is_registered):
+        state = crud.get_last_light_state_for_device(db, deviceIp)
+        return state
+    return HTTPException(status_code=403, detail="device not registered")
+
 @router.get("/getLastState/{deviceId}", response_model=schemas.LightSocketBase)
 def get_last_light_socket_state(deviceId:int, db: Session = Depends(dependencies.get_db), current_user_id: int = Depends(dependencies.get_current_user_id)):
     state = crud.get_last_light_state(db, deviceId)
     return state
-
-@router.get("/getLastState/{deviceId}/device", response_model=schemas.LightSocketBase)
-def get_last_light_socket_state_for_registered_device(deviceId:int, request: Request, db: Session = Depends(dependencies.get_db), device_is_registered: str = Depends(dependencies.get_current_request_ip)):
-    if(device_is_registered):
-        state = crud.get_last_light_state(db, deviceId)
-        return state
-    return HTTPException(status_code=403, detail="device not registered")
 
 @router.post("/createState", response_model=schemas.LightSocket)
 def create_new_light_socket_state(lightState: schemas.LightSocketCreate, db: Session = Depends(dependencies.get_db), current_user_id: int = Depends(dependencies.get_current_user_id)):

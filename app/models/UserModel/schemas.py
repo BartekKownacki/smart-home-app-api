@@ -10,13 +10,8 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
-class UserChangeRole(UserBase):
-    is_admin: bool
-
 class User(UserBase):
-
     id: int
-    is_admin: bool
 
     class Config:
         orm_mode = True

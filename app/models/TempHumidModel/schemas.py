@@ -10,9 +10,11 @@ class TemperatureHumidityBase(BaseModel):
 class TemperatureHumidityCreate(TemperatureHumidityBase):
     device_ip: str
 
-class TemperatureHumidity(TemperatureHumidityBase):
-    id: int
+class TemperatureHumidityGet(TemperatureHumidityBase):
     device_id: int
+
+class TemperatureHumidity(TemperatureHumidityGet):
+    id: int
     owner_id: int
     createdDate: datetime
 

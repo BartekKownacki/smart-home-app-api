@@ -16,6 +16,16 @@ def get_last_ac_state(db: Session, deviceId: int):
                                             state = db_obj.state,)
     return state_to_return
 
+def get_last_ac_state_for_device(db: Session, deviceIp: str):
+    deviceId = dependencies.get_id_from_ip(deviceIp, DEVICE_TYPE)
+    if(not dependencies.is_device_in_config(deviceId, DEVICE_TYPE)):
+        return dependencies.device_error()
+    
+    db_obj = db.query(models.AcSocket).filter(models.AcSocket.device_id == deviceId).order_by(models.AcSocket.id.desc()).first()
+    state_to_return = schemas.AcSocketBase(device_id = db_obj.device_id,
+                                            state = db_obj.state,)
+    return state_to_return
+
 def create_ac_state(db: Session, acState: schemas.AcSocketCreate, user_id: int):
     createdDate = datetime.now()
 
@@ -41,7 +51,7 @@ def create_ac_state(db: Session, acState: schemas.AcSocketCreate, user_id: int):
     url =  ip_address + post_endpoint
     data = acState
     response = dependencies.send_data_to_esp(url, data)
-    if(response.status > 400):
+    if(response == 500 or response.status > 400):
         return dependencies.esp_error(response)
     
     return db_acState
