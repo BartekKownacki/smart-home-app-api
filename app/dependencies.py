@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
+from pydantic import BaseModel, Json
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -25,31 +25,26 @@ SECRET_KEY = config_file_data["jwt_config"]["SECRET_KEY"]
 ALGORITHM = config_file_data["jwt_config"]["ALGORITHM"]
 ACCESS_TOKEN_EXPIRE_MINUTES = config_file_data["jwt_config"]["ACCESS_TOKEN_EXPIRE_MINUTES"]
 
-#config_file.close()
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login/AuthorizeButton")
 
+httpxClient = httpx.Client(timeout=3.0)
 
 class Token(BaseModel):
     access_token: str
     token_type: str
 
-
 class TokenData(BaseModel):
     username: Optional[str] = None
 
-class BaseDevice(BaseModel):
-    name: str
-    type: str
-    ip_address: str
-    get_endpoint: str
-    post_endpoint: str
+class Response(BaseModel):
+    status_code: Optional[str] = None
+    data: Optional[str] = None
 
-class Device(BaseDevice):
-    deviceID: str
+class ResponseGet(BaseModel):
+    status_code: Optional[str] = None
+    data: Optional[Json]
 
-    
 def get_db():
     db = SessionLocal()
     try:
@@ -126,7 +121,6 @@ async def is_current_user_an_admin(current_user: schemas.User = Depends(get_curr
     return current_user
 
 def get_request_ip(request: Request):
-    print(request.client.host)
     return request.client.host
 
 def is_ip_in_config(request: Request, db:Session):
@@ -200,20 +194,40 @@ def get_get_endpoint_from_id(deviceId, userId, type, db: Session):
         return device_type_error()
     return db_obj.post_endpoint
 
-
-def send_data_to_esp(url, data):
+async def check_is_esp_online(deviceId, userId, type, db: Session):
+    ip = get_ip_from_id(deviceId, userId, type, db)
+    get_endpoint = get_get_endpoint_from_id(deviceId, userId, type, db)
+    url = "http://" + ip + get_endpoint
+    response = Response()
     try:
-        response = httpx.post(url, json=data)
-        return response.status_code
+        result = httpxClient.get(url)
+        response.status_code = result.status_code
+        response.data = result.text
     except:
-        return 500
+        response.status_code = 777
+    return response
 
-def get_data_from_esp(url):
+async def send_data_to_esp(url, data):
+    url = "http://" + url
+    response = Response()
     try:
-        response = httpx.get(url)
-        return response
+        result = httpxClient.post(url, json=data)
+        response.status_code = result.status_code
+        response.data = result.text
     except:
-        return 500
+        response.status_code = 777
+    return response
+
+async def get_data_from_esp(url):
+    url = "http://" + url
+    response = Response()
+    try:
+        result = httpxClient.get(url)
+        response.status_code = result.status_code
+        response.data = result.json()
+    except:
+        response.status_code = 777
+    return response
 
 def device_error():
     raise HTTPException(status_code=403, detail= "Device is not registered or device id is used for a different device type")
@@ -230,8 +244,8 @@ def password_error():
 def email_error():
     raise HTTPException(status_code=403, detail="Email did not match the requirements")
 
-def esp_error(code):
-    if(code == 500):
-        raise HTTPException(status_code=code, detail= "There was an error with device")
+def esp_error(response):
+    if(response.status_code == 777):
+        return JSONResponse(status_code=200, content={"state": "Disconnected"} )
     else:
-        raise HTTPException(status_code=code.status, detail= "There was an error with device")
+        raise HTTPException(status_code=response.status_code, detail= "There was an error with device")

@@ -15,9 +15,11 @@ def get_all_devices_ips(db: Session):
     db_obj = db.query(models.Device).all()
     return db_obj
 
-def is_device_available_for_user(db: Session, userId=int, deviceId = str):
-    db_obj = db.query(models.Device).filter(models.Device.owner_id == userId).filter(models.Device.id == deviceId).first()
-    return db_obj
+def is_device_available_for_user(db: Session, userId=int, deviceId = int):
+    if(userId == 0):
+        return db.query(models.Device).filter(models.Device.id == deviceId).first()
+    return db.query(models.Device).filter(models.Device.owner_id == userId).filter(models.Device.id == deviceId).first()
+     
 
 def get_device_by_ip_for_device(db: Session, deviceIp = str):
     db_obj = db.query(models.Device).filter(models.Device.ip_address == deviceIp).first()

@@ -1,13 +1,17 @@
 from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
-
+import json
 
 class AcSocketBase(BaseModel):
-    state: bool
+    state: str
+
+    def toJson(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
 
 class AcSocketCreate(AcSocketBase):
-    pass
+    state: bool
 
 class AcSocket(AcSocketBase):
     device_id: int

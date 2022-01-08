@@ -41,5 +41,5 @@ async def add_new_device(device: schemas.DeviceCreate, current_user_id: int = De
 
 @router.delete("/delete/{device_id}", response_model=bool)
 async def delete_device_by_device_id(device_id: int, current_user_id: int = Depends(dependencies.get_current_user_id), db: Session = Depends(dependencies.get_db)):
-    success = crud.delete_device_by_id(db, device_id)
+    success = crud.delete_device_by_id(db, device_id, current_user_id)
     return success
