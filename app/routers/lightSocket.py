@@ -11,14 +11,15 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse
 
 router = APIRouter(
-    prefix="/lightsocket",
-    tags=["Light Socket actions"],
+    prefix="/lightswitch",
+    tags=["Light Switch actions"],
     responses={404: {"description": "Not found"}},
 )
 
 #For device
 @router.get("/getLastState/device", response_model=schemas.LightSocketBase)
-def get_last_light_socket_state_for_registered_device(request: Request,db: Session = Depends(dependencies.get_db), device_is_registered: str = Depends(dependencies.is_ip_in_config)):
+def get_last_light_socket_state_for_registered_device(request: Request,db: Session = Depends(dependencies.get_db)):
+    device_is_registered = dependencies.is_ip_in_config(request,db)
     deviceIp = dependencies.get_request_ip(request)
     print(deviceIp)
     if(device_is_registered):
@@ -28,9 +29,9 @@ def get_last_light_socket_state_for_registered_device(request: Request,db: Sessi
 
 @router.get("/getLastState/{deviceId}", response_model=schemas.LightSocketBase)
 def get_last_light_socket_state(deviceId:int, db: Session = Depends(dependencies.get_db), current_user_id: int = Depends(dependencies.get_current_user_id)):
-    state = crud.get_last_light_state(db, deviceId)
+    state = crud.get_last_light_state(db, deviceId, current_user_id)
     return state
 
-@router.post("/createState", response_model=schemas.LightSocket)
-def create_new_light_socket_state(lightState: schemas.LightSocketCreate, db: Session = Depends(dependencies.get_db), current_user_id: int = Depends(dependencies.get_current_user_id)):
-    return crud.create_light_state(db=db, lightState=lightState, user_id=current_user_id)
+@router.post("/createState/{deviceId}", response_model=schemas.LightSocket)
+def create_new_light_socket_state(deviceId: int, lightState: schemas.LightSocketCreate, db: Session = Depends(dependencies.get_db), current_user_id: int = Depends(dependencies.get_current_user_id)):
+    return crud.create_light_state(db=db, lightState=lightState, user_id=current_user_id, deviceId=deviceId)

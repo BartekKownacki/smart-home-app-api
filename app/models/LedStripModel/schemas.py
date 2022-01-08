@@ -3,19 +3,18 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class LedStripeBase(BaseModel):
-    device_id: int
+class LedStripBase(BaseModel):
     state: bool
     color_red: int
     color_green: int
     color_blue: int
 
-class LedStripeCreate(LedStripeBase):
+class LedStripCreate(LedStripBase):
     pass
 
-
-class LedStripe(LedStripeBase):
+class LedStrip(LedStripBase):
     id: int
+    device_id: int
     owner_id: int
     createdDate: datetime
 

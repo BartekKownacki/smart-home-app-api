@@ -12,5 +12,5 @@ class User(Base):
 
     acSockets = relationship("AcSocket", back_populates="owner")
     lightSockets = relationship("LightSocket", back_populates="owner")
-    ledStripes = relationship("LedStripe", back_populates="owner")
+    ledStrips = relationship("LedStrip", back_populates="owner")
     temperatureHumidities = relationship("TemperatureHumidity", back_populates="owner")

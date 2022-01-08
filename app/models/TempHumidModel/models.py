@@ -9,7 +9,8 @@ class TemperatureHumidity(Base):
     temperature = Column(Float)
     humidity = Column(Integer)
     createdDate = Column(DateTime)
-    device_id = Column(Integer)
+    device_id = Column(Integer, ForeignKey("devices.id"))
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="temperatureHumidities")
+    device = relationship("Device", back_populates="temperatureHumidities")

@@ -62,13 +62,6 @@ def get_all_users(skip: int = 0, limit: int = 100, db: Session = Depends(depende
     users = crud.get_users(db, skip=skip, limit=limit)
     return users
 
-# @router.put("/changeRole", response_model=schemas.ChangeRoleResponse)
-# def change_user_role(user_name: str, value: bool, db: Session = Depends(dependencies.get_db), current_user: schemas.User = Depends(dependencies.get_current_user)):
-#     username = crud.change_user_role(db, username=user_name, value=value)
-#     if not username:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     return username
-
 @router.get("/info",  response_model=schemas.User)
 async def get_actual_user_info(current_user: schemas.User = Depends(dependencies.get_current_user)):
     return current_user

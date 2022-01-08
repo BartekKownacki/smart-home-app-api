@@ -2,8 +2,8 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
 
-class LedStripe(Base):
-    __tablename__ = "ledStripes"
+class LedStrip(Base):
+    __tablename__ = "ledStrips"
 
     id = Column(Integer, primary_key=True, index=True)
     state = Column(Boolean)
@@ -11,7 +11,8 @@ class LedStripe(Base):
     color_green = Column(Integer)
     color_blue = Column(Integer)
     createdDate = Column(DateTime)
-    device_id = Column(Integer)
+    device_id = Column(Integer, ForeignKey("devices.id"))
     owner_id = Column(Integer, ForeignKey("users.id"))
 
-    owner = relationship("User", back_populates="ledStripes")
+    owner = relationship("User", back_populates="ledStrips")
+    device = relationship("Device", back_populates="ledStrips")

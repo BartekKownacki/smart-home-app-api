@@ -17,17 +17,18 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/getLastState/{deviceId}", response_model=schemas.TemperatureHumidityGet)
+@router.get("/getLastState/{deviceId}", response_model=schemas.TemperatureHumidityBase)
 def get_last_temphumid_state(deviceId:int, db: Session = Depends(dependencies.get_db), current_user_id: int = Depends(dependencies.get_current_user_id)):
-    state = crud.get_last_temperature_humidity_state(db)
+    state = crud.get_last_temperature_humidity_state(db, deviceId, current_user_id)
     return state
 
-@router.get("/checkState/{deviceId}/now", response_model=schemas.TemperatureHumidityGet)
+@router.get("/checkState/{deviceId}/now", response_model=schemas.TemperatureHumidityBase)
 def get_last_state_from_esp(deviceId:int, db: Session = Depends(dependencies.get_db), current_user_id: int = Depends(dependencies.get_current_user_id)):
-    return crud.get_data_from_esp_now(db=db, user_id=current_user_id)
+    return crud.get_data_from_esp_now(db=db, user_id=current_user_id,device_id=deviceId )
 
 @router.post("/saveState/device", response_model=schemas.TemperatureHumidity)
-def post_states_from_esp_frequently_only_registered_ips(newState: schemas.TemperatureHumidityCreate, db: Session = Depends(dependencies.get_db), device_is_registered: str = Depends(dependencies.is_ip_in_config)):
+def post_states_from_esp_frequently_only_registered_ips(newState: schemas.TemperatureHumidityCreate, db: Session = Depends(dependencies.get_db)):
+    #device_is_registered = dependencies.is_ip_in_config(request,db)
     return crud.create_new_temperature_humidity_state(db=db, user_id=0, temphumid=newState)
 
 

@@ -18,9 +18,9 @@ router = APIRouter(
 
 #For device
 @router.get("/getLastState/device", response_model=schemas.AcSocketBase)
-def get_last_ac_state_for_registered_device(request: Request,db: Session = Depends(dependencies.get_db), device_is_registered: str = Depends(dependencies.is_ip_in_config)):
+def get_last_ac_state_for_registered_device(request: Request,db: Session = Depends(dependencies.get_db)):
+    device_is_registered = dependencies.is_ip_in_config(request,db)
     deviceIp = dependencies.get_request_ip(request)
-    print(deviceIp)
     if(device_is_registered):
         state = crud.get_last_ac_state_for_device(db, deviceIp)
         return state
@@ -28,9 +28,9 @@ def get_last_ac_state_for_registered_device(request: Request,db: Session = Depen
 
 @router.get("/getLastState/{deviceId}", response_model=schemas.AcSocketBase)
 def get_last_ac_state(deviceId:int, db: Session = Depends(dependencies.get_db), current_user_id: int = Depends(dependencies.get_current_user_id)):
-    state = crud.get_last_ac_state(db, deviceId)
+    state = crud.get_last_ac_state(db, deviceId, current_user_id)
     return state
 
-@router.post("/createState", response_model=schemas.AcSocket)
-def create_new_ac_state(acState: schemas.AcSocketCreate, db: Session = Depends(dependencies.get_db), current_user_id: int = Depends(dependencies.get_current_user_id)):
-    return crud.create_ac_state(db=db, acState=acState, user_id=current_user_id)
+@router.post("/createState/{deviceId}", response_model=schemas.AcSocket)
+def create_new_ac_state(deviceId: int, acState: schemas.AcSocketCreate, db: Session = Depends(dependencies.get_db), current_user_id: int = Depends(dependencies.get_current_user_id)):
+    return crud.create_ac_state(db=db, acState=acState, user_id=current_user_id, deviceId = deviceId)

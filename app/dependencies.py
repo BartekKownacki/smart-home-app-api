@@ -4,6 +4,7 @@ from typing import Optional, List
 import json
 import httpx
 from models.UserModel import crud, schemas
+from models.DeviceModel import crud as deviceCrud
 from database import SessionLocal
 from sqlalchemy.orm import Session
 
@@ -30,8 +31,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login/AuthorizeButton")
 
 
-
-
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -50,10 +49,7 @@ class BaseDevice(BaseModel):
 class Device(BaseDevice):
     deviceID: str
 
-class InternalError(BaseModel):
-    status: int
-
-
+    
 def get_db():
     db = SessionLocal()
     try:
@@ -130,149 +126,80 @@ async def is_current_user_an_admin(current_user: schemas.User = Depends(get_curr
     return current_user
 
 def get_request_ip(request: Request):
+    print(request.client.host)
     return request.client.host
 
-async def is_ip_in_config(request: Request):
+def is_ip_in_config(request: Request, db:Session):
 
-    config_file = open("config_devices.json", "r")
-    config_file_data = json.load(config_file)
+    devices_ips_from_db = deviceCrud.get_all_devices_ips(db)
+    device_ips = []
+    for device in devices_ips_from_db:
+        device_ips.append(device.ip_address)
 
     '''
     To bedzie dzialac tylko i wylacznie w sieci lokalnej wiec tymczasowowo nie bedzie sprawdzalo adresow
     '''
 
-    # ## LOCAL ### 
+    # ## LOCAL ###
+    # ipToReturn = request.client.host
+    # if ipToReturn in device_ips:
+    #     return True
+    # raise HTTPException(status_code=403, detail="device is not registered") 
+    
+    # ----- OLD -----
     # ipToReturn = request.client.host
     # for element in config_file_data:
     #     if(ipToReturn == config_file_data[element]["ip_address"]):
     #         return True
-        
     # raise HTTPException(status_code=403, detail="device is not registered")
-
-    return True
-
-
-def get_devices_config():
-    config_file = open("config_devices.json", "r")
-    DEVICES = json.load(config_file)
-    return DEVICES
-
-def get_ids_from_config():
-    with open("config_devices.json",'r+') as file:
-        file_data = json.load(file)
-        usedIds = [] 
-        for element in file_data:
-            usedIds.append(element["deviceID"])
-    return usedIds
-
-def get_ids_from_config_for_type(type):
-    with open("config_devices.json",'r+') as file:
-        file_data = json.load(file)
-        usedIds = [] 
-        for element in file_data:
-            if(element["type"] == type):
-                usedIds.append(element["deviceID"])
-    return usedIds
-
-def get_ips_from_config_for_type(type):
-    with open("config_devices.json",'r+') as file:
-        file_data = json.load(file)
-        usedIps = [] 
-        for element in file_data:
-            if(element["type"] == type):
-                usedIps.append(element["ip_address"])
-    return usedIps
-
-def is_device_in_config(deviceId, type):
-    usedIds = get_ids_from_config_for_type(type)
-    if(deviceId in usedIds):
-        return True
-    return False
-
-def get_id_from_ip(device_ip, type):
-    with open("config_devices.json",'r+') as file:
-        file_data = json.load(file)
-        id = 0
-        for element in file_data:
-            if(element["type"] == type and element["ip_address"] == device_ip):
-                id = element["deviceID"]
-
-    return id
-
-def get_ip_from_id(device_id, type):
-    with open("config_devices.json",'r+') as file:
-        file_data = json.load(file)
-        ip = ""
-        for element in file_data:
-            if(element["type"] == type and element["deviceID"] == device_id):
-                ip = element["ip_address"]
-
-    return ip
-
-def get_endpoint_from_id(device_id, type, endpoint_type):
-    with open("config_devices.json",'r+') as file:
-        file_data = json.load(file)
-        address = ""
-        for element in file_data:
-            if(element["type"] == type and element["deviceID"] == device_id):
-                address = element["endpoints"][endpoint_type]
-
-    return address
-
-# def is_device_in_config_by_ip(deviceIp, type):
-#     usedIps = get_ips_from_config_for_type(type)
-#     if(deviceIp in usedIps):
-#         deviceId = 
-#         return deviceIP
-#     return False
-
-def generateId(usedIds):
-    if(usedIds):
-        randomint = randint(10000, 99999)
-        while(randomint in usedIds):
-            print (randomint)
-            randomint = randint(10000, 99999)
+    # ---------------
     
-    return randomint
-
-def add_device_to_config(device: Device):
-    with open("config_devices.json",'r+') as file:
-        file_data = json.load(file)
-        
-        usedIds = get_ids_from_config()
-
-        deviceId = generateId(usedIds)
-
-        devices_json_object = {
-            "name": device.name,
-            "type": device.type,
-            "deviceID": deviceId,
-            "ip_address": device.ip_address,
-            "endpoints": {
-                "get": device.get_endpoint,
-                "post": device.post_endpoint
-            }
-        }
-
-        file_data.append(devices_json_object)
-        file.seek(0)
-        json.dump(file_data, file, indent = 4)
-        print(file)
-    return deviceId
-
-def remove_device_from_config(device_id: int):    
-    with open("config_devices.json",'r+') as file:
-        file_data = json.load(file)
-        for element in file_data:
-            if element["deviceID"] == device_id:
-                print(element)
-                file_data.remove(element)
-                break
-        #print(file_data)
-
-    with open('config_devices.json', 'w') as dest_file:
-        dest_file.write(json.dumps(file_data))
     return True
+
+
+def is_device_in_config(deviceId, userId, type, db: Session):
+    db_obj = deviceCrud.is_device_available_for_user(db, userId, deviceId)
+    if not db_obj:
+        return device_error()
+
+    if db_obj.type != type:
+        return device_type_error()
+    
+    return True
+
+def get_id_from_ip(device_ip, type, db: Session):
+    db_obj = deviceCrud.get_device_by_ip_for_device(db, device_ip)
+    if not db_obj:
+        return device_error()
+    if db_obj.type != type:
+        return device_type_error()
+    return db_obj.id
+    
+
+def get_ip_from_id(deviceId, userId, type, db: Session):
+    db_obj = deviceCrud.is_device_available_for_user(db, userId, deviceId)
+    if not db_obj:
+        return device_error()
+    if db_obj.type != type:
+        return device_type_error()
+    return db_obj.ip_address
+
+def get_post_endpoint_from_id(deviceId, userId, type, db: Session):
+    db_obj = deviceCrud.is_device_available_for_user(db, userId, deviceId)
+    if not db_obj:
+        return device_error()
+    if db_obj.type != type:
+        return device_type_error()
+    return db_obj.post_endpoint
+
+def get_get_endpoint_from_id(deviceId, userId, type, db: Session):
+    db_obj = deviceCrud.is_device_available_for_user(db, userId, deviceId)
+    if not db_obj:
+        return device_error()
+    if db_obj.type != type:
+        return device_type_error()
+    return db_obj.post_endpoint
+
 
 def send_data_to_esp(url, data):
     try:
@@ -289,21 +216,22 @@ def get_data_from_esp(url):
         return 500
 
 def device_error():
-    return JSONResponse(status_code=403, content={
-        "error_code": 403,
-        "message": "Device is not registered or device id is used for a different device type"}, )
+    raise HTTPException(status_code=403, detail= "Device is not registered or device id is used for a different device type")
+
+def device_type_error():
+    raise HTTPException(status_code=403, detail= "Wrong device type")
+
+def already_registered_device_error():
+    raise HTTPException(status_code=403, detail= "Device is already registered")
 
 def password_error():
-    return JSONResponse(status_code=403, content={
-        "error_code": 403,
-        "message": "Password did not match the requirements"}, )
+   raise HTTPException(status_code=403, detail="Password did not match the requirements")
 
 def email_error():
-    return JSONResponse(status_code=403, content={
-        "error_code": 403,
-        "message": "Email did not match the requirements"}, )
+    raise HTTPException(status_code=403, detail="Email did not match the requirements")
 
 def esp_error(code):
-    return JSONResponse(status_code=code, content={
-        "error_code": code,
-        "message": "There was an error with device"}, )
+    if(code == 500):
+        raise HTTPException(status_code=code, detail= "There was an error with device")
+    else:
+        raise HTTPException(status_code=code.status, detail= "There was an error with device")
