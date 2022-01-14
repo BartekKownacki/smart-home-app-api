@@ -3,6 +3,7 @@ from datetime import datetime
 from . import models, schemas
 import dependencies 
 from fastapi import HTTPException
+import json
 
 DEVICE_TYPE = 'LIGHT_SWITCH'
 STATE_ON = "On"
