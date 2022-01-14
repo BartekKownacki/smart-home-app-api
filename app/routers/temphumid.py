@@ -28,7 +28,7 @@ async def get_last_state_from_esp(deviceId:int, db: Session = Depends(dependenci
 
 @router.post("/saveState/device", response_model=schemas.TemperatureHumidityBase)
 def post_states_from_esp_frequently_only_registered_ips(newState: schemas.TemperatureHumidityCreate, db: Session = Depends(dependencies.get_db)):
-    #device_is_registered = dependencies.is_ip_in_config(request,db)
+    device_is_registered = dependencies.is_ip_in_config(request,db)
     return crud.create_new_temperature_humidity_state(db=db, user_id=0, temphumid=newState)
 
 

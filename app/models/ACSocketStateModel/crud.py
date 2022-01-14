@@ -3,7 +3,7 @@ from datetime import datetime
 from . import models, schemas
 import dependencies 
 from fastapi import HTTPException
-
+import json 
 DEVICE_TYPE = 'AC_SOCKET'
 STATE_ON = "On"
 STATE_OFF = "Off"
@@ -13,16 +13,31 @@ async def get_last_ac_state(db: Session, deviceId: int, user_id: int):
     if(not dependencies.is_device_in_config(deviceId, user_id, DEVICE_TYPE, db)):
         return dependencies.device_error()
 
-    is_esp_online_response = await dependencies.check_is_esp_online(deviceId, user_id, DEVICE_TYPE, db)
-    if is_esp_online_response.status_code > 400:
-        return dependencies.esp_error(is_esp_online_response)
+    response = await dependencies.check_is_esp_online(deviceId, user_id, DEVICE_TYPE, db)
+    if response.status_code > 400:
+        return dependencies.esp_error(response)
 
     db_obj = db.query(models.AcSocket).filter(models.AcSocket.device_id == deviceId).order_by(models.AcSocket.id.desc()).first()
     if not db_obj:
         return schemas.AcSocketBase(state = STATE_OFF)
     
-    state_to_return = schemas.AcSocketBase(state = STATE_ON if db_obj.state else STATE_OFF)
-    return state_to_return
+    serialized_response = json.loads(response.data)
+    
+    if(db_obj.state != serialized_response['state']):
+        state_to_return = schemas.AcSocketBase(state = STATE_ON if db_obj.state else STATE_OFF)
+        createdDate = datetime.now()    
+        db_acState = models.AcSocket(state = serialized_response['state'], 
+                                device_id= deviceId,
+                                createdDate=createdDate,
+                                owner_id=user_id)
+        db.add(db_acState)
+        db.commit()
+        db.refresh(db_acState)
+        return state_to_return
+    else:
+        return schemas.AcSocketBase(state = STATE_ON if db_obj.state else STATE_OFF)
+        
+    
 
 def get_last_ac_state_for_device(db: Session, deviceIp: str):
     deviceId = dependencies.get_id_from_ip(deviceIp, DEVICE_TYPE, db)
