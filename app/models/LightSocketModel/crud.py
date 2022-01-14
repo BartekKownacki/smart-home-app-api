@@ -4,7 +4,6 @@ from . import models, schemas
 import dependencies 
 from fastapi import HTTPException
 import json
-
 DEVICE_TYPE = 'LIGHT_SWITCH'
 STATE_ON = "On"
 STATE_OFF = "Off"
@@ -19,9 +18,6 @@ async def get_last_light_state(db: Session, deviceId: int, user_id: int):
         return dependencies.esp_error(response)
 
     db_obj = db.query(models.LightSocket).filter(models.LightSocket.device_id == deviceId).order_by(models.LightSocket.device_id.desc()).first()
-    if not db_obj:
-        return schemas.LightSocketBase(state = STATE_OFF)
-    state_to_return = schemas.LightSocketBase(state = STATE_ON if db_obj.state else STATE_OFF)
     if not db_obj:
         return schemas.LightSocketBase(state = STATE_OFF)
     serialized_response = json.loads(response.data)

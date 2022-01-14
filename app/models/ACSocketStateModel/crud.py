@@ -20,9 +20,6 @@ async def get_last_ac_state(db: Session, deviceId: int, user_id: int):
     db_obj = db.query(models.AcSocket).filter(models.AcSocket.device_id == deviceId).order_by(models.AcSocket.device_id.desc()).first()
     if not db_obj:
         return schemas.AcSocketBase(state = STATE_OFF)
-    state_to_return = schemas.AcSocketBase(state = STATE_ON if db_obj.state else STATE_OFF)
-    if not db_obj:
-        return schemas.AcSocketBase(state = STATE_OFF)
     serialized_response = json.loads(response.data)
     serialized_response_state = serialized_response['state']
     if(db_obj.state != serialized_response_state):
