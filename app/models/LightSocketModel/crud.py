@@ -54,7 +54,7 @@ async def create_light_state(db: Session, lightState: schemas.LightSocketCreate,
     url =  ip_address + post_endpoint
     data = lightState.toJson()
     response = await dependencies.send_data_to_esp(url, data)
-    if(response.status > 400):
+    if(response.status_code > 400):
         return dependencies.esp_error(response)
     
     return db_lightState
