@@ -192,7 +192,7 @@ def get_get_endpoint_from_id(deviceId, userId, type, db: Session):
         return device_error()
     if db_obj.type != type:
         return device_type_error()
-    return db_obj.post_endpoint
+    return db_obj.get_endpoint
 
 async def check_is_esp_online(deviceId, userId, type, db: Session):
     ip = get_ip_from_id(deviceId, userId, type, db)
@@ -211,7 +211,7 @@ async def send_data_to_esp(url, data):
     url = "http://" + url
     response = Response()
     try:
-        result = httpxClient.post(url, json=data)
+        result = httpxClient.post(url, data=data)
         response.status_code = result.status_code
         response.data = result.text
     except:
