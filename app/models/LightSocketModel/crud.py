@@ -9,19 +9,34 @@ STATE_ON = "On"
 STATE_OFF = "Off"
 STATE_DISCONNECTED = "Disconnected"
 
-async def get_last_light_state(db: Session, deviceId: int, user_id: int):
+async def get_last_light_state(db: Session, deviceId: int, user_id: int): 
     if(not dependencies.is_device_in_config(deviceId, user_id, DEVICE_TYPE, db)):
         return dependencies.device_error()
-    
-    is_esp_online_response = await dependencies.check_is_esp_online(deviceId, user_id, DEVICE_TYPE, db)
-    if is_esp_online_response.status_code > 400:
-        return dependencies.esp_error(is_esp_online_response)
 
-    db_obj = db.query(models.LightSocket).filter(models.LightSocket.device_id == deviceId).order_by(models.LightSocket.id.desc()).first()
+    response = await dependencies.check_is_esp_online(deviceId, user_id, DEVICE_TYPE, db)
+    if response.status_code > 400:
+        return dependencies.esp_error(response)
+
+    db_obj = db.query(models.LightSocket).filter(models.LightSocket.device_id == deviceId).order_by(models.LightSocket.device_id.desc()).first()
     if not db_obj:
         return schemas.LightSocketBase(state = STATE_OFF)
     state_to_return = schemas.LightSocketBase(state = STATE_ON if db_obj.state else STATE_OFF)
-    return state_to_return
+    if not db_obj:
+        return schemas.LightSocketBase(state = STATE_OFF)
+    serialized_response = json.loads(response.data)
+    serialized_response_state = serialized_response['state']
+    if(db_obj.state != serialized_response_state):
+        state_to_return = schemas.LightSocketBase(state = STATE_ON if serialized_response_state else STATE_OFF)
+        createdDate = datetime.now()    
+        db_lightState = models.LightSocket(state = serialized_response_state, 
+                                device_id= deviceId,
+                                createdDate=createdDate,
+                                owner_id=user_id)
+        db.add(db_lightState)
+        db.commit()
+        db.refresh(db_lightState)
+        return state_to_return
+    return schemas.LightSocketBase(state = STATE_ON if db_obj.state else STATE_OFF)
 
 def get_last_light_state_for_device(db: Session, deviceIp: str):
     deviceId = dependencies.get_id_from_ip(deviceIp, DEVICE_TYPE, db)

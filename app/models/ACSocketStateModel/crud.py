@@ -17,16 +17,18 @@ async def get_last_ac_state(db: Session, deviceId: int, user_id: int):
     if response.status_code > 400:
         return dependencies.esp_error(response)
 
-    db_obj = db.query(models.AcSocket).filter(models.AcSocket.device_id == deviceId).order_by(models.AcSocket.id.desc()).first()
+    db_obj = db.query(models.AcSocket).filter(models.AcSocket.device_id == deviceId).order_by(models.AcSocket.device_id.desc()).first()
     if not db_obj:
         return schemas.AcSocketBase(state = STATE_OFF)
-    
+    state_to_return = schemas.AcSocketBase(state = STATE_ON if db_obj.state else STATE_OFF)
+    if not db_obj:
+        return schemas.AcSocketBase(state = STATE_OFF)
     serialized_response = json.loads(response.data)
-    
-    if(db_obj.state != serialized_response['state']):
-        state_to_return = schemas.AcSocketBase(state = STATE_ON if db_obj.state else STATE_OFF)
+    serialized_response_state = serialized_response['state']
+    if(db_obj.state != serialized_response_state):
+        state_to_return = schemas.AcSocketBase(state = STATE_ON if serialized_response_state else STATE_OFF)
         createdDate = datetime.now()    
-        db_acState = models.AcSocket(state = serialized_response['state'], 
+        db_acState = models.AcSocket(state = serialized_response_state, 
                                 device_id= deviceId,
                                 createdDate=createdDate,
                                 owner_id=user_id)
@@ -34,10 +36,7 @@ async def get_last_ac_state(db: Session, deviceId: int, user_id: int):
         db.commit()
         db.refresh(db_acState)
         return state_to_return
-    else:
-        return schemas.AcSocketBase(state = STATE_ON if db_obj.state else STATE_OFF)
-        
-    
+    return schemas.AcSocketBase(state = STATE_ON if db_obj.state else STATE_OFF)
 
 def get_last_ac_state_for_device(db: Session, deviceIp: str):
     deviceId = dependencies.get_id_from_ip(deviceIp, DEVICE_TYPE, db)
