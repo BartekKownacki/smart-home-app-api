@@ -3,7 +3,7 @@ from datetime import datetime
 from . import models, schemas
 import dependencies 
 from fastapi import HTTPException
-
+import json
 DEVICE_TYPE = 'TEMP_HUMID'
 
 def get_last_temperature_humidity_state(db: Session, deviceId: int, user_id: int):
@@ -27,13 +27,25 @@ async def get_data_from_esp_now(db: Session, user_id: int, device_id):
     response = await dependencies.get_data_from_esp(url)
     if(response.status_code > 400):
          return dependencies.esp_error(response)
-    temphumid = schemas.TemperatureHumidityCreate(temperature= 23.1,
-                                                    humidity= 51.2, 
-                                                    device_ip= 'TEST_TEMP_IP')    
+
+    serialized_response = json.loads(response.data)
+    serialized_response_temperature = serialized_response['temperature']
+    serialized_response_humidity = serialized_response['humidity']
+    temphumid = schemas.TemperatureHumidityBase(temperature= serialized_response_temperature,
+                                                    humidity= serialized_response_humidity)    
     
     # work with response
-    # save to db
-    return create_new_temperature_humidity_state(db, user_id, temphumid)
+    createdDate = datetime.now()
+    db_tempdhumidState = models.TemperatureHumidity(temperature = temphumid.temperature,
+                                humidity = temphumid.humidity,
+                                createdDate=createdDate,
+                                device_id=device_id,
+                                owner_id=user_id)
+    db.add(db_tempdhumidState)
+    db.commit()
+    db.refresh(db_tempdhumidState)
+    
+    return temphumid
 
 def create_new_temperature_humidity_state(db: Session, user_id: int, temphumid: schemas.TemperatureHumidityCreate ):
     createdDate = datetime.now()
