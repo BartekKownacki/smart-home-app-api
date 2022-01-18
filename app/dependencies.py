@@ -224,7 +224,7 @@ async def get_data_from_esp(url):
     try:
         result = httpxClient.get(url)
         response.status_code = result.status_code
-        response.data = result.json()
+        response.data = result.text()
     except:
         response.status_code = 777
     return response

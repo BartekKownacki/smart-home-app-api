@@ -21,3 +21,4 @@ class AcSocket(AcSocketBase):
 
     class Config:
         orm_mode = True
+
